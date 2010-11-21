@@ -1,13 +1,13 @@
 package Text::Bayon;
 use strict;
 use warnings;
-use File::Temp qw(tempfile);
+use File::Temp qw(tempdir tempfile);
 use Carp;
 use base qw(Class::Accessor::Fast);
 
 __PACKAGE__->mk_accessors($_) for qw(bayon_path dry_run io_files);
 
-our $VERSION = '0.00001';
+our $VERSION = '0.00002';
 
 sub new {
     my $class = shift;
@@ -83,7 +83,8 @@ sub _io_file_names {
     my %io_files;
 
     if ( ref $input eq 'HASH' ) {
-        my ( $fh, $fname ) = tempfile( CLEANUP => 1 );
+		my $dir            = tempdir(CLEANUP => 1);
+        my ( $fh, $fname ) = tempfile(DIR => $dir);
         while ( my ( $key, $val ) = each %$input ) {
             print $fh $key, "\t";
             print $fh join( "\t", (%$val) ), "\n";
@@ -92,7 +93,8 @@ sub _io_file_names {
         $io_files{input} = $fname;
     }
     elsif ( ref $input eq 'GLOB' ) {
-        my ( $fh, $fname ) = tempfile( CLEANUP => 1 );
+		my $dir            = tempdir(CLEANUP => 1);
+        my ( $fh, $fname ) = tempfile(DIR => $dir);
         while ( my $rec = <$input> ) {
             print $fh $rec;
         }
@@ -112,7 +114,8 @@ sub _io_file_names {
             $io_files{$_} = $args_outfiles->{$_};
         }
         else {
-            my ( $fh, $fname ) = tempfile( CLEANUP => 1 );
+			my $dir            = tempdir(CLEANUP => 1);
+			my ( $fh, $fname ) = tempfile(DIR => $dir);
             close($fh);
             $io_files{$_} = $fname;
         }
